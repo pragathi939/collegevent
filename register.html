@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <nav>
+    <h2>College Events</h2>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="register.html">Register</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+  <div class="form-card">
+    <h1>Student Registration</h1>
+    <p class="note">Upload your college Student ID Card (.jpg, .jpeg, .png or .pdf).</p>
+
+    <form id="registrationForm">
+      <label>Student Name</label>
+      <input type="text" id="studentName" required>
+
+      <label>Register Number</label>
+      <input type="text" id="registerNo" required>
+
+      <label>Email</label>
+      <input type="email" id="email" required>
+
+      <label>Department</label>
+      <select id="department" required>
+        <option value="">Select Department</option>
+        <option>Information Technology</option>
+        <option>Computer Science and Engineering</option>
+        <option>Electronics and Communication Engineering</option>
+        <option>Electrical and Electronics Engineering</option>
+        <option>Mechanical Engineering</option>
+        <option>Civil Engineering</option>
+      </select>
+
+      <label>Year</label>
+      <select id="year" required>
+        <option value="">Select Year</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+      </select>
+
+      <label>Event Name</label>
+      <select id="eventName" required>
+        <option value="">Select Event</option>
+        <option>Web Design Contest</option>
+        <option>Quiz Competition</option>
+        <option>Dance Competition</option>
+      </select>
+
+      <label>Event Type</label>
+      <div class="radio-row">
+        <label><input type="radio" name="eventType" value="Technical" required> Technical</label>
+        <label><input type="radio" name="eventType" value="Cultural"> Cultural</label>
+      </div>
+
+      <label>Student ID Card</label>
+      <input type="file" id="idCard" accept=".jpg,.jpeg,.png,.pdf" required>
+      <small>Accepted: JPG, JPEG, PNG, PDF | Maximum: 2 MB</small>
+
+      <button class="btn full" type="submit">REGISTER</button>
+    </form>
+
+    <div id="message"></div>
+  </div>
+</main>
+
+<footer>© 2026 College Event Registration System</footer>
+
+<script>
+const params = new URLSearchParams(location.search);
+const selectedEvent = params.get("event");
+if (selectedEvent) document.getElementById("eventName").value = selectedEvent;
+
+const eventTypeMap = {
+  "Web Design Contest": "Technical",
+  "Quiz Competition": "Technical",
+  "Dance Competition": "Cultural"
+};
+
+document.getElementById("eventName").addEventListener("change", function() {
+  const type = eventTypeMap[this.value];
+  if (type) {
+    const radio = document.querySelector(`input[name="eventType"][value="${type}"]`);
+    if (radio) radio.checked = true;
+  }
+});
+
+document.getElementById("registrationForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const file = document.getElementById("idCard").files[0];
+  const allowed = ["image/jpeg", "image/png", "application/pdf"];
+
+  if (!file || !allowed.includes(file.type)) {
+    showMessage("Please upload only JPG, JPEG, PNG or PDF.", "error");
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    showMessage("File size must be less than 2 MB.", "error");
+    return;
+  }
+
+  const registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
+  const registerNo = document.getElementById("registerNo").value.trim();
+  const eventName = document.getElementById("eventName").value;
+
+  const duplicate = registrations.some(r =>
+    r.registerNo.toLowerCase() === registerNo.toLowerCase() &&
+    r.eventName === eventName
+  );
+
+  if (duplicate) {
+    showMessage("You have already registered for this event.", "error");
+    return;
+  }
+
+  const registration = {
+    studentName: document.getElementById("studentName").value.trim(),
+    registerNo,
+    email: document.getElementById("email").value.trim(),
+    department: document.getElementById("department").value,
+    year: document.getElementById("year").value,
+    eventName,
+    eventType: document.querySelector('input[name="eventType"]:checked').value,
+    idCard: file.name,
+    date: new Date().toLocaleString()
+  };
+
+  registrations.push(registration);
+  localStorage.setItem("registrations", JSON.stringify(registrations));
+
+  showMessage("Registration successful!", "success");
+  this.reset();
+});
+
+function showMessage(text, type) {
+  const box = document.getElementById("message");
+  box.className = type;
+  box.textContent = text;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Events</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <nav>
+    <h2>College Events</h2>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="register.html">Register</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+  <h1>Available Events</h1>
+  <div id="eventList" class="event-grid"></div>
+</main>
+
+<footer>© 2026 College Event Registration System</footer>
+
+<script>
+const events = [
+  {name:"Web Design Contest", type:"Technical", date:"15-10-2026", venue:"Seminar Hall", max:50},
+  {name:"Quiz Competition", type:"Technical", date:"18-10-2026", venue:"Lab 2", max:40},
+  {name:"Dance Competition", type:"Cultural", date:"20-10-2026", venue:"Auditorium", max:60}
+];
+
+const registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
+
+document.getElementById("eventList").innerHTML = events.map((e, i) => {
+  const count = registrations.filter(r => r.eventName === e.name).length;
+  return `
+    <div class="event-card">
+      <span class="badge">${e.type}</span>
+      <h2>${e.name}</h2>
+      <p><b>Date:</b> ${e.date}</p>
+      <p><b>Venue:</b> ${e.venue}</p>
+      <p><b>Registered:</b> ${count}/${e.max}</p>
+      <a class="btn" href="register.html?event=${encodeURIComponent(e.name)}">Register Now</a>
+    </div>`;
+}).join("");
+</script>
+</body>
+</html>

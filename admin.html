@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <nav>
+    <h2>College Events</h2>
+    <div>
+      <a href="index.html">Home</a>
+      <a href="events.html">Events</a>
+      <a href="register.html">Register</a>
+      <a href="admin.html">Admin</a>
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+  <h1>Admin Dashboard</h1>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search by Register Number">
+    <select id="filter">
+      <option value="">All Events</option>
+      <option>Web Design Contest</option>
+      <option>Quiz Competition</option>
+      <option>Dance Competition</option>
+    </select>
+    <button class="btn" onclick="clearAll()">Clear All</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reg No</th>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Event</th>
+          <th>ID Card</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="registrationTable"></tbody>
+    </table>
+  </div>
+</main>
+
+<footer>© 2026 College Event Registration System</footer>
+
+<script>
+let registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
+
+function render() {
+  const search = document.getElementById("search").value.toLowerCase();
+  const filter = document.getElementById("filter").value;
+
+  const filtered = registrations.filter(r =>
+    r.registerNo.toLowerCase().includes(search) &&
+    (!filter || r.eventName === filter)
+  );
+
+  const tbody = document.getElementById("registrationTable");
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No registrations found.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r) => {
+    const index = registrations.indexOf(r);
+    return `
+      <tr>
+        <td>${escapeHtml(r.registerNo)}</td>
+        <td>${escapeHtml(r.studentName)}</td>
+        <td>${escapeHtml(r.department)}</td>
+        <td>${escapeHtml(r.eventName)}</td>
+        <td><span class="file-name">${escapeHtml(r.idCard)}</span></td>
+        <td><button class="delete" onclick="deleteRegistration(${index})">Delete</button></td>
+      </tr>`;
+  }).join("");
+}
+
+function deleteRegistration(index) {
+  if (confirm("Delete this registration?")) {
+    registrations.splice(index, 1);
+    localStorage.setItem("registrations", JSON.stringify(registrations));
+    render();
+  }
+}
+
+function clearAll() {
+  if (confirm("Delete all registrations?")) {
+    registrations = [];
+    localStorage.setItem("registrations", JSON.stringify(registrations));
+    render();
+  }
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, m => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+  }[m]));
+}
+
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("filter").addEventListener("change", render);
+render();
+</script>
+</body>
+</html>
